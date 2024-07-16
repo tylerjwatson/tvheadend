@@ -1667,7 +1667,7 @@ static int
 page_xspf(http_connection_t *hc, const char *remain, void *opaque, int urlauth)
 {
   htsbuf_queue_t *hq = &hc->hc_reply;
-  char buf[80], hostpath[512];
+  char buf[80], hostpath[512], disposition[512];
   const char *title, *profile, *ticket, *image, *delim = "?";
 
   if ((title = http_arg_get(&hc->hc_req_args, "title")) == NULL)
@@ -1715,7 +1715,8 @@ page_xspf(http_connection_t *hc, const char *remain, void *opaque, int urlauth)
      </track>\r\n\
   </trackList>\r\n\
 </playlist>\r\n");
-  http_output_content(hc, MIME_XSPF_XML);
+  snprintf(disposition, sizeof(disposition), "attachment; filename=\"%s.xspf\"", title);
+  http_output_content_disposition(hc, MIME_XSPF_XML, disposition);
   return 0;
 }
 
@@ -1727,7 +1728,7 @@ static int
 page_m3u(http_connection_t *hc, const char *remain, void *opaque, int urlauth)
 {
   htsbuf_queue_t *hq = &hc->hc_reply;
-  char buf[80], hostpath[512];
+  char buf[80], hostpath[512], disposition[512];
   const char *title, *profile, *ticket, *delim = "?";
 
   if ((title = http_arg_get(&hc->hc_req_args, "title")) == NULL)
@@ -1764,8 +1765,9 @@ page_m3u(http_connection_t *hc, const char *remain, void *opaque, int urlauth)
   default:
     break;
   }
+  snprintf(disposition, sizeof(disposition), "attachment; filename=\"%s.m3u\"", title);
   htsbuf_append_str(hq, "\n");
-  http_output_content(hc, MIME_M3U);
+  http_output_content_disposition(hc, MIME_M3U, disposition);
   return 0;
 }
 
